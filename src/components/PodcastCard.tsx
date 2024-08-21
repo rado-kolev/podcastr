@@ -1,16 +1,16 @@
 import Image from 'next/image';
 
-const PodcastCard = ({ podcastId, title, description, imgURL }: {
+const PodcastCard = ({ podcastId, title, description, imgUrl }: {
   podcastId: number;
   title: string;
   description: string;
-  imgURL: string;
+  imgUrl: string;
 }) => {
   return (
     <div className='cursor-pointer' >
       <figure className='flex flex-col gap-2'>
         <Image
-          src={imgURL}
+          src={imgUrl}
           width={174}
           height={174}
           alt={title}
