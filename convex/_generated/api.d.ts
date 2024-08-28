@@ -17,8 +17,8 @@ import type {
 import type * as files from "../files.js";
 import type * as http from "../http.js";
 import type * as podcasts from "../podcasts.js";
+import type * as serviceai from "../serviceai.js";
 import type * as tasks from "../tasks.js";
-import type * as ttsai from "../ttsai.js";
 import type * as users from "../users.js";
 
 /**
@@ -33,8 +33,8 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   http: typeof http;
   podcasts: typeof podcasts;
+  serviceai: typeof serviceai;
   tasks: typeof tasks;
-  ttsai: typeof ttsai;
   users: typeof users;
 }>;
 export declare const api: FilterApi<

@@ -23,7 +23,7 @@ const useGeneratePodcast = ({
   const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const { startUpload } = useUploadFiles(generateUploadUrl);
 
-  const getPodcastAudio = useAction(api.ttsai.generateAudioAction);
+  const getPodcastAudio = useAction(api.serviceai.generateAudioAction);
 
   const getAudioUrl = useMutation(api.podcasts.getUrl);
 
