@@ -54,7 +54,7 @@ export const generateThumbnailAction = action({
         num_inference_steps: 20,
         num_images: 1,
         image: {
-          size: 'standard', // Customize size if needed - Available options: square, portrait, social_post, social_story, standard, rectangular, widescreen
+          size: 'square', // Customize size if needed - Available options: square, portrait, social_post, social_story, standard, rectangular, widescreen
         },
       }),
     };
@@ -78,7 +78,7 @@ export const generateThumbnailAction = action({
         const base64Image = responseData.data[0].base64;
 
         // Convert base64 to ArrayBuffer
-        const base64ToArrayBuffer = (base64) => {
+        const base64ToArrayBuffer = (base64: any) => {
           const binaryString = atob(base64);
           const binaryLen = binaryString.length;
           const bytes = new Uint8Array(binaryLen);

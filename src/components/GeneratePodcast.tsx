@@ -1,5 +1,5 @@
 import { GeneratePodcastProps } from '@/types';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
@@ -45,7 +45,6 @@ const useGeneratePodcast = ({
       });
 
       const blob = new Blob([response], { type: 'audio/mpeg' });
-
       const fileName = `podcast-${uuidv4()}.mp3`;
       const file = new File([blob], fileName, { type: 'audio/mpeg' });
 
@@ -55,7 +54,6 @@ const useGeneratePodcast = ({
       setAudioStorageId(storageId);
 
       const audioUrl = await getAudioUrl({ storageId });
-
       setAudio(audioUrl!);
       setIsGenerating(false);
       toast({

@@ -2,13 +2,23 @@ import { ConvexError, v } from 'convex/values';
 import { mutation } from './_generated/server';
 
 
+export const getUrl = mutation({
+  args: {
+    storageId: v.id('_storage'),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.storage.getUrl(args.storageId);
+  },
+});
+
+
 // create podcast mutation
 export const createPodcast = mutation({
   args: {
-    audioStorageId: v.id("_storage"),
     podcastTitle: v.string(),
     podcastDescription: v.string(),
     audioUrl: v.string(),
+    audioStorageId: v.id("_storage"),
     imageUrl: v.string(),
     imageStorageId: v.id("_storage"),
     voicePrompt: v.string(),
@@ -50,14 +60,5 @@ export const createPodcast = mutation({
       authorImageUrl: user[0].imageUrl,
       audioDuration: args.audioDuration,
     });
-  },
-});
-
-export const getUrl = mutation({
-  args: {
-    storageId: v.id('_storage'),
-  },
-  handler: async (ctx, args) => {
-    return await ctx.storage.getUrl(args.storageId);
   },
 });

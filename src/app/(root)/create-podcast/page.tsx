@@ -3,12 +3,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,7 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import GeneratePodcast from '@/components/GeneratePodcast';
 import GenerateThumbnail from '@/components/GenerateThumbnail';
@@ -60,11 +58,13 @@ const CreatePodcast = () => {
   const [voicePrompt, setVoicePrompt] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   const createPodcast = useMutation(api.podcasts.createPodcast);
-
   const { toast } = useToast();
-  // 1. Define your form.
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -73,15 +73,41 @@ const CreatePodcast = () => {
     },
   });
 
+  const handleVoiceSelection = (value: string) => {
+    setVoiceType(value);
+
+    // Pause and reset the previous audio if it exists
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.src = ''; // Clear the source
+    }
+
+    // Create a new audio element and assign it to the ref
+    const newAudio = new Audio(`/voices/${value}.mp3`);
+    audioRef.current = newAudio;
+
+    // Play the new audio
+    newAudio
+      .play()
+      .catch((error) => console.error('Audio playback failed:', error));
+  };
+
+  useEffect(() => {
+    // Clean up the audio instance on component unmount
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = ''; // Clear the source
+      }
+    };
+  }, []);
+
   async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
       if (!audioUrl || !imageUrl || !voiceType) {
-        toast({
-          title: 'Please generate audio and image',
-        });
         setIsSubmitting(false);
-        throw new Error('Please generate audio and image');
+        return;
       }
 
       const podcast = await createPodcast({
@@ -97,15 +123,17 @@ const CreatePodcast = () => {
         audioStorageId: audioStorageId!,
         imageStorageId: imageStorageId!,
       });
-      toast({ title: 'Podcast created' });
-      setIsSubmitting(false);
+
+      toast({ title: 'Podcast created', duration: 3000 });
       router.push('/');
     } catch (error) {
       console.log(error);
       toast({
         title: 'Error',
         variant: 'destructive',
+        duration: 3000,
       });
+    } finally {
       setIsSubmitting(false);
     }
   }
@@ -145,7 +173,7 @@ const CreatePodcast = () => {
                 Select AI Voice
               </Label>
 
-              <Select onValueChange={(value) => setVoiceType(value)}>
+              <Select onValueChange={handleVoiceSelection}>
                 <SelectTrigger
                   className={cn(
                     'text-16 w-full border-none bg-black-1 text-gray-1 focus-visible:ring-offset-orange-1'
@@ -167,13 +195,15 @@ const CreatePodcast = () => {
                     </SelectItem>
                   ))}
                 </SelectContent>
-                {/* {voiceType && (
+                {/* Dynamically play the selected voice type */}
+                {voiceType && (
                   <audio
-                    src={`/${voiceType}.mp3`}
+                    src={`/voices/${voiceType}.mp3`}
                     autoPlay
+                    ref={audioRef}
                     className='hidden'
                   />
-                )} */}
+                )}
               </Select>
             </div>
 
@@ -206,6 +236,8 @@ const CreatePodcast = () => {
               voicePrompt={voicePrompt}
               setVoicePrompt={setVoicePrompt}
               setAudioDuration={setAudioDuration}
+              isGeneratingAudio={isGeneratingAudio}
+              setIsGeneratingAudio={setIsGeneratingAudio}
             />
 
             <GenerateThumbnail
@@ -214,6 +246,8 @@ const CreatePodcast = () => {
               image={imageUrl}
               imagePrompt={imagePrompt}
               setImagePrompt={setImagePrompt}
+              isGeneratingImage={isGeneratingImage}
+              setIsGeneratingImage={setIsGeneratingImage}
             />
 
             <div className='mt-10 w-full'>
