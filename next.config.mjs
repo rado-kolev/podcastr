@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'gallant-toucan-563.convex.cloud',
       },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
+      },
     ],
   },
 };
