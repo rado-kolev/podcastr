@@ -16,6 +16,7 @@ const PodcastPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [isVisible, setIsVisible] = useState(true); // State for visibility
   const { audio } = useAudio();
 
   const togglePlayPause = () => {
@@ -38,8 +39,6 @@ const PodcastPlayer = () => {
   const forward = () => {
     if (
       audioRef.current &&
-      audioRef.current.currentTime &&
-      audioRef.current.duration &&
       audioRef.current.currentTime + 5 < audioRef.current.duration
     ) {
       audioRef.current.currentTime += 5;
@@ -51,6 +50,16 @@ const PodcastPlayer = () => {
       audioRef.current.currentTime -= 5;
     } else if (audioRef.current) {
       audioRef.current.currentTime = 0;
+    }
+  };
+
+  const closePlayer = () => {
+    setIsVisible(false);
+    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0; // Reset time on close
+      setCurrentTime(0);
     }
   };
 
@@ -69,21 +78,33 @@ const PodcastPlayer = () => {
         audioElement.removeEventListener('timeupdate', updateCurrentTime);
       };
     }
-  }, []);
+  }, [isVisible]); // Re-attach listener when player becomes visible
 
   useEffect(() => {
     const audioElement = audioRef.current;
     if (audio?.audioUrl) {
       if (audioElement) {
+        audioElement.src = audio.audioUrl;
+        audioElement.load(); // Reload the audio element to reset the audio
         audioElement.play().then(() => {
           setIsPlaying(true);
         });
+        setDuration(audioElement.duration);
       }
+      setIsVisible(true); // Show the player when a new podcast starts playing
     } else {
       audioElement?.pause();
-      setIsPlaying(true);
+      setIsPlaying(false);
     }
   }, [audio]);
+
+  useEffect(() => {
+    if (isVisible && audioRef.current) {
+      audioRef.current.play();
+      setIsPlaying(true);
+    }
+  }, [isVisible]);
+
   const handleLoadedMetadata = () => {
     if (audioRef.current) {
       setDuration(audioRef.current.duration);
@@ -94,13 +115,14 @@ const PodcastPlayer = () => {
     setIsPlaying(false);
   };
 
+  if (!isVisible) return null;
+
   return (
     <div
       className={cn('sticky bottom-0 left-0 flex size-full flex-col', {
         hidden: !audio?.audioUrl || audio?.audioUrl === '',
       })}
     >
-      {/* change the color for indicator inside the Progress component in ui folder */}
       <Progress
         value={(currentTime / duration) * 100}
         className='w-full'
@@ -162,7 +184,7 @@ const PodcastPlayer = () => {
             />
           </div>
         </div>
-        
+
         <div className='flex items-center gap-6'>
           <div className='flex items-center gap-2 max-md:hidden'>
             <h2 className='text-16 font-normal text-white-2'>
@@ -184,6 +206,18 @@ const PodcastPlayer = () => {
               className='cursor-pointer'
             />
           </div>
+        </div>
+
+        {/* Close button */}
+        <div className='absolute top-2 right-2'>
+          <Image
+            src={'/icons/close.svg'}
+            width={24}
+            height={24}
+            alt='close'
+            onClick={closePlayer}
+            className='cursor-pointer'
+          />
         </div>
       </section>
     </div>

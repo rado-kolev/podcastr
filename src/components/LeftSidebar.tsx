@@ -1,21 +1,27 @@
 'use client';
 
+import { useUser, SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
 import { sidebarLinks } from '@/constants';
 import { cn } from '@/lib/utils';
-import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
-import Image from 'next/image'
-import Link from 'next/link'
+import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
+import { useAudio } from '@/providers/AudioProvider';
 
 const LeftSidebar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useClerk();
-
+  const { audio } = useAudio();
+  const { user } = useUser(); // Get the current user
 
   return (
-    <section className='left_sidebar'>
+    <section
+      className={cn('left_sidebar h-[calc(100vh-5px)]', {
+        'h-[calc(100vh-140px)]': audio?.audioUrl,
+      })}
+    >
       <nav className='flex flex-col gap-6'>
         <Link
           href='/'
@@ -28,12 +34,17 @@ const LeftSidebar = () => {
         </Link>
 
         {sidebarLinks.map(({ route, label, imgUrl }) => {
+          // Replace the static profile route with a dynamic one if it's the profile link
+          const profileRoute =
+            route === '/profile' ? `/profile/${user?.id}` : route;
+
           const isActive =
-            pathname === route || pathname.startsWith(`${route}/`);
+            pathname === profileRoute ||
+            pathname.startsWith(`${profileRoute}/`);
 
           return (
             <Link
-              href={route}
+              href={profileRoute}
               key={label}
               className={cn(
                 'flex gap-3 items-center py-4 max-md:px-4 justify-center md:justify-start hover:bg-nav-hover',
@@ -72,6 +83,6 @@ const LeftSidebar = () => {
       </SignedIn>
     </section>
   );
-}
+};
 
-export default LeftSidebar
+export default LeftSidebar;
