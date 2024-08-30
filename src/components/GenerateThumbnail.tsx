@@ -144,7 +144,7 @@ const GenerateThumbnail = ({
           <div className='w-full max-w-[200px]'>
             <Button
               type='button'
-              className='text-16 bg-orange-1 py-4 font-bold text-white-1'
+              className='text-16 bg-orange-1 hover:bg-orange-1/80 py-4 font-bold text-white-1'
               onClick={generateImage}
             >
               {isImageLoading ? (
