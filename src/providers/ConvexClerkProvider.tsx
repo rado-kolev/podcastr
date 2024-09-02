@@ -6,12 +6,12 @@ import { ConvexReactClient } from 'convex/react';
 import { ReactNode } from 'react';
 
 const convex = new ConvexReactClient(
-  'https://gallant-toucan-563.convex.cloud'
+  process.env.NEXT_PUBLIC_CONVEX_URL as string
 );
 
 const ConvexClerkProvider = ({ children }: { children: ReactNode }) => (
   <ClerkProvider
-    publishableKey='pk_test_bHVja3ktZ3JvdXNlLTE3LmNsZXJrLmFjY291bnRzLmRldiQ'
+    publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
     appearance={{
       layout: {
         socialButtonsVariant: 'iconButton',
