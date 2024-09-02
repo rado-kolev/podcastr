@@ -14,8 +14,12 @@ const AudioProvider = ({ children }: { children: React.ReactNode }) => {
     if (pathname === '/create-podcast') setAudio(undefined);
   }, [pathname]);
 
+  const clearAudio = () => {
+    setAudio(undefined);
+  };
+
   return (
-    <AudioContext.Provider value={{ audio, setAudio }}>
+    <AudioContext.Provider value={{ audio, setAudio, clearAudio }}>
       {children}
     </AudioContext.Provider>
   );

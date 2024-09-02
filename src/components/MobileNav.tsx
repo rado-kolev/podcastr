@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/sheet';
 import { sidebarLinks } from '@/constants';
 import { cn } from '@/lib/utils';
-import { SignedIn, SignedOut, useClerk } from '@clerk/nextjs';
+import { SignedIn, SignedOut, useClerk, useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -18,12 +18,12 @@ const MobileNav = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useClerk();
-
+  const { user } = useUser(); // Get the current user
 
   return (
     <section>
       <Sheet>
-        <SheetTrigger>
+        <SheetTrigger className='flex'>
           <Image
             src='/icons/hamburger.svg'
             width={30}
@@ -46,13 +46,18 @@ const MobileNav = () => {
             <SheetClose asChild>
               <nav className='flex h-full flex-col gap-6 text-white-1'>
                 {sidebarLinks.map(({ route, label, imgUrl }) => {
+                  // Replace the static profile route with a dynamic one if it's the profile link
+                  const profileRoute =
+                    route === '/profile' ? `/profile/${user?.id}` : route;
+
                   const isActive =
-                    pathname === route || pathname.startsWith(`${route}/`);
+                    pathname === profileRoute ||
+                    pathname.startsWith(`${profileRoute}/`);
 
                   return (
                     <SheetClose asChild key={route}>
                       <Link
-                        href={route}
+                        href={profileRoute}
                         className={cn(
                           'flex gap-3 items-center py-4 max-lg:px-4 justify-start',
                           {

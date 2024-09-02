@@ -24,6 +24,9 @@ export default function RootLayout({
                 height={30}
                 alt='menu icon'
               />
+              <h1 className='text-24 font-extrabold  text-white-1 ml-2'>
+                Podcastr
+              </h1>
               <MobileNav />
             </div>
             <div className='flex flex-col md:pb-14'>

@@ -16,8 +16,8 @@ const PodcastPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [isVisible, setIsVisible] = useState(true); // State for visibility
-  const { audio } = useAudio();
+  const [isVisible, setIsVisible] = useState(false); // Initialize visibility to false
+  const { audio, clearAudio } = useAudio();
 
   const togglePlayPause = () => {
     if (audioRef.current?.paused) {
@@ -37,19 +37,20 @@ const PodcastPlayer = () => {
   };
 
   const forward = () => {
-    if (
-      audioRef.current &&
-      audioRef.current.currentTime + 5 < audioRef.current.duration
-    ) {
-      audioRef.current.currentTime += 5;
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.min(
+        audioRef.current.currentTime + 5,
+        audioRef.current.duration
+      );
     }
   };
 
   const rewind = () => {
-    if (audioRef.current && audioRef.current.currentTime - 5 > 0) {
-      audioRef.current.currentTime -= 5;
-    } else if (audioRef.current) {
-      audioRef.current.currentTime = 0;
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(
+        audioRef.current.currentTime - 5,
+        0
+      );
     }
   };
 
@@ -58,10 +59,27 @@ const PodcastPlayer = () => {
     setIsPlaying(false);
     if (audioRef.current) {
       audioRef.current.pause();
-      audioRef.current.currentTime = 0; // Reset time on close
+      audioRef.current.currentTime = 0;
       setCurrentTime(0);
     }
+    clearAudio(); // Clear the audio when the player is closed
   };
+
+  useEffect(() => {
+    if (audio?.audioUrl) {
+      setIsVisible(true); // Show the player when there is an audio
+      const audioElement = audioRef.current;
+      if (audioElement) {
+        audioElement.src = audio.audioUrl;
+        audioElement.load();
+        audioElement.play().then(() => setIsPlaying(true));
+        setDuration(audioElement.duration || 0);
+        setCurrentTime(0);
+      }
+    } else {
+      setIsVisible(false); // Hide the player when no audio is set
+    }
+  }, [audio]);
 
   useEffect(() => {
     const updateCurrentTime = () => {
@@ -73,35 +91,9 @@ const PodcastPlayer = () => {
     const audioElement = audioRef.current;
     if (audioElement) {
       audioElement.addEventListener('timeupdate', updateCurrentTime);
-
       return () => {
         audioElement.removeEventListener('timeupdate', updateCurrentTime);
       };
-    }
-  }, [isVisible]); // Re-attach listener when player becomes visible
-
-  useEffect(() => {
-    const audioElement = audioRef.current;
-    if (audio?.audioUrl) {
-      if (audioElement) {
-        audioElement.src = audio.audioUrl;
-        audioElement.load(); // Reload the audio element to reset the audio
-        audioElement.play().then(() => {
-          setIsPlaying(true);
-        });
-        setDuration(audioElement.duration);
-      }
-      setIsVisible(true); // Show the player when a new podcast starts playing
-    } else {
-      audioElement?.pause();
-      setIsPlaying(false);
-    }
-  }, [audio]);
-
-  useEffect(() => {
-    if (isVisible && audioRef.current) {
-      audioRef.current.play();
-      setIsPlaying(true);
     }
   }, [isVisible]);
 
@@ -120,7 +112,7 @@ const PodcastPlayer = () => {
   return (
     <div
       className={cn('sticky bottom-0 left-0 flex size-full flex-col', {
-        hidden: !audio?.audioUrl || audio?.audioUrl === '',
+        hidden: !audio?.audioUrl,
       })}
     >
       <Progress
@@ -208,7 +200,6 @@ const PodcastPlayer = () => {
           </div>
         </div>
 
-        {/* Close button */}
         <div className='absolute top-2 right-2'>
           <Image
             src={'/icons/close.svg'}
