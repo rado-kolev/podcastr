@@ -81,16 +81,20 @@ const CreatePodcast = () => {
       audioRef.current.pause();
       audioRef.current.src = ''; // Clear the source
     }
-
-    // Create a new audio element and assign it to the ref
-    const newAudio = new Audio(`/voices/${value}.mp3`);
-    audioRef.current = newAudio;
-
-    // Play the new audio
-    newAudio
-      .play()
-      .catch((error) => console.error('Audio playback failed:', error));
   };
+
+  useEffect(() => {
+    if (voiceType) {
+      // Create a new audio element and assign it to the ref
+      const newAudio = new Audio(`/voices/${voiceType}.mp3`);
+      audioRef.current = newAudio;
+
+      // Play the new audio
+      newAudio
+        .play()
+        .catch((error) => console.error('Audio playback failed:', error));
+    }
+  }, [voiceType]);
 
   useEffect(() => {
     // Clean up the audio instance on component unmount
@@ -196,15 +200,8 @@ const CreatePodcast = () => {
                   ))}
                 </SelectContent>
 
-                {/* Dynamically play the selected voice type */}
-                {voiceType && (
-                  <audio
-                    src={`/voices/${voiceType}.mp3`}
-                    autoPlay
-                    ref={audioRef}
-                    className='hidden'
-                  />
-                )}
+                {/* Audio element for selected voice */}
+                <audio ref={audioRef} className='hidden' />
               </Select>
             </div>
 
