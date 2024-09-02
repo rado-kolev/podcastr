@@ -11,7 +11,7 @@ const convex = new ConvexReactClient(
 
 const ConvexClerkProvider = ({ children }: { children: ReactNode }) => (
   <ClerkProvider
-    publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY as string}
+    publishableKey='pk_test_bHVja3ktZ3JvdXNlLTE3LmNsZXJrLmFjY291bnRzLmRldiQ'
     appearance={{
       layout: {
         socialButtonsVariant: 'iconButton',
